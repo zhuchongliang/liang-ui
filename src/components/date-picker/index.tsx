@@ -19,12 +19,8 @@ const Wheel: FC<WheelProps> = ({ colunm }) => {
 			event: EventTypes["drag"]
 		})
 	): void => {
-		if (state.last) {
-			const position = state.offset[1];
-			const currentIndex = Math.round(position / 34);
-		} else {
-
-		}
+		let a: number;
+		a = 2;
 	};
 	const [{ y }, api] = useSpring(() => ({ y: 0 }));
 	const bind = useDrag(({ down, movement: [mx, my], stopPropagation }) => {
