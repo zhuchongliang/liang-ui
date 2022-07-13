@@ -1,0 +1,95 @@
+.action-sheet-component {
+	&.show {
+		animation: actionsheet-fade-in 300ms both;
+		.action-sheet-component-body {
+			animation: actionsheet-slide-in-up 300ms both;
+		}
+	}
+	&.hide {
+		animation: actionsheet-fade-out 300ms both;
+		.action-sheet-component-body {
+			animation: actionsheet-slide-in-down 300ms both;
+		}
+	}
+	&-mask {
+		position: fixed;
+		left: 0;
+		top: 0;
+		z-index: 10;
+		width: 100%;
+		height: 100%;
+		background: rgba(0, 0, 0, .55);
+		opacity: 1;
+	}
+	&-body {
+		position: fixed;
+		left: 0;
+		bottom: 0;
+		z-index: 11;
+		border-radius: 10px 10px 0 0;
+		width: 100%;
+		background-color: #fff;
+	}
+	&-button-list {
+		&-item {
+			display: block;
+			box-sizing: border-box;
+			border-bottom: 1px solid #eee;
+			height: 57px;
+			&-name {
+				height: 56px;
+				line-height: 56px;
+				text-align: center;
+				font-size: 18px;
+				color: #333;
+			}
+		}
+	}
+	&-confirm-button {
+		padding-top: 8px;
+		background-color: #f5f5f5;
+		&-item {
+			display: block;
+			&-name {
+				height: 56px;
+				background-color: #fff;
+				line-height: 56px;
+				text-align: center;
+				font-size: 18px;
+				color: #333;
+			}
+		}
+	}
+}
+@keyframes actionsheet-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@keyframes actionsheet-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+@keyframes actionsheet-slide-in-up {
+	from {
+		transform: translate3d(0, 50px, 0);
+	}
+	to {
+		transform: translate3d(0, 0, 0);
+	}
+}
+@keyframes actionsheet-slide-in-down {
+	from {
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		transform: translate3d(0, 50px, 0);
+	}
+}

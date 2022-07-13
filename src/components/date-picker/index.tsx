@@ -1,35 +1,86 @@
-import React, { FC, useCallback, useLayoutEffect, useState } from "react";
+import React, { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import disableScroll from "disable-scroll";
-import dayjs from "dayjs";
 import { useDrag, EventTypes, FullGestureState } from "@use-gesture/react";
 import { useSpring, animated } from "@react-spring/web";
 
 import "./index.scss";
-import generateDatePicerColumns, { columnItem } from "../../utils/date-picker-utils";
+import { generateDatePickerColumns, columnItem, defaultRenderLabel, DatePrecision } from "../../utils/date-picker-utils";
+import { rubberbandIfOutOfBounds, bound } from "../../utils/wheel-utils";
 
 const pickerViewClassPrefix = "picker-view";
 
 interface WheelProps {
+	type: DatePrecision
+	value: number
 	colunm: columnItem[]
+	colunmIndex: number
+	onSelect: (selected: number, colunmIndex: number) => void
 }
-const Wheel: FC<WheelProps> = ({ colunm }) => {
+const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) => {
+	const draggingRef = useRef(false);
+	useEffect(() => {
+		if (!colunm.some(item => item.value === value)) {
+			onSelect(colunm[0].value, colunmIndex);
+		}
+		// eslint-disable-next-line
+	}, [colunm, value]);
+	useEffect(() => {
+		if (draggingRef.current) return;
+		const targetIndex = colunm.findIndex(item => item.value === value);
+		if (targetIndex < 0) return;
+		const finalPosition = -targetIndex * 34;
+		api.start({
+			immediate: y.goal !== finalPosition, y: finalPosition
+		});
+		// eslint-disable-next-line
+	}, [value, colunm]);
+	const rootRef = useRef<HTMLDivElement>(null);
+	const [{ y }, api] = useSpring(() => ({
+		config: {
+			mass: 0.8,
+			tension: 400
+		},
+		from: { y: 0 }
+	}));
+	const scrollSelect = (index: number): void => {
+		const finalPosition = -index * 34;
+		api.start({
+			y: finalPosition
+		});
+		const val = colunm[index];
+		onSelect(val.value, colunmIndex);
+	};
 	const handleDrag = (
 		state:
 		(Omit<FullGestureState<"drag">, "event"> & {
 			event: EventTypes["drag"]
 		})
 	): void => {
-		let a: number;
-		a = 2;
+		const min = -((colunm.length - 1) * 34);
+		const max = 0;
+		draggingRef.current = true;
+		if (state.last) {
+			draggingRef.current = false;
+			const position = state.offset[1] + state.velocity[1] * 50 * state.direction[1];
+			const targetIndex = -Math.round(bound(min, max, position) / 34);
+			scrollSelect(targetIndex);
+		} else {
+			const position = state.offset[1];
+			api.start({
+				y: rubberbandIfOutOfBounds(0.2, 34 * 50, max, min, position)
+			});
+		}
 	};
-	const [{ y }, api] = useSpring(() => ({ y: 0 }));
-	const bind = useDrag(({ down, movement: [mx, my], stopPropagation }) => {
-		stopPropagation();
-		api.start({ immediate: down, y: down ? my : 0 });
+	useDrag(handleDrag, {
+		axis: "y",
+		filterTaps: true,
+		from: () => [0, y.get()],
+		pointer: { touch: true },
+		target: rootRef
 	});
 	return (
-		<animated.div {...bind()} style={{ y }} className={`${pickerViewClassPrefix}-body-column-wheel`}>
-			{colunm.map(v => <div key={v.value} className={`${pickerViewClassPrefix}-body-column-item`}>{String(v.value)}</div>)}
+		<animated.div ref={rootRef} style={{ y }} className={`${pickerViewClassPrefix}-body-column-wheel`}>
+			{colunm.map(v => <div key={v.value} className={`${pickerViewClassPrefix}-body-column-item`}>{defaultRenderLabel(type, v.value)}</div>)}
 		</animated.div>
 	);
 };
@@ -38,25 +89,30 @@ interface PickerViewProps {
 	onClose?: () => void
 	onConfirm?: () => void
 	title?: string
+	precision: DatePrecision
 }
-const PickerView: FC<PickerViewProps> = function({ onClose, onConfirm, title }) {
-	const day = dayjs().date();
-	const month = dayjs().month();
-	const year = dayjs().year();
-	const [selected] = useState([year, month, day]);
-	const columns = generateDatePicerColumns(selected, "day");
+const PickerView: FC<PickerViewProps> = function({ onClose, onConfirm, title, precision }) {
+	const [selected, setSelected] = useState<number[]>([]);
+	const columns = generateDatePickerColumns(selected, precision);
+	const onSelect = useCallback((val: number, colunmIndex: number): void => {
+		setSelected((prev) => {
+			const next = [...prev];
+			next[colunmIndex] = val;
+			return next;
+		});
+	}, []);
 	const onCancel = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		e.preventDefault();
 		disableScroll.off();
 		onClose?.();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line
 	}, []);
 	const onChange = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		e.preventDefault();
 		onConfirm?.();
 		disableScroll.off();
 		onClose?.();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line
 	}, []);
 	return (
 		<div className={pickerViewClassPrefix}>
@@ -67,14 +123,19 @@ const PickerView: FC<PickerViewProps> = function({ onClose, onConfirm, title }) 
 			</div>
 			<div className={`${pickerViewClassPrefix}-body`}>
 				{
-					columns?.map(v => {
+					columns?.map((v, i) => {
 						return (
 							<div className={`${pickerViewClassPrefix}-body-column`} key={v.type}>
-								<Wheel colunm={v.column}></Wheel>
+								<Wheel colunm={v.column} onSelect={onSelect} colunmIndex={i} value={selected[i]} type={v.type}></Wheel>
 							</div>
 						);
 					})
 				}
+				<div className={`${pickerViewClassPrefix}-body-mask`}>
+					<div className={`${pickerViewClassPrefix}-body-mask-top`}></div>
+					<div className={`${pickerViewClassPrefix}-body-mask-middle`}></div>
+					<div className={`${pickerViewClassPrefix}-body-mask-bottom`}></div>
+				</div>
 			</div>
 		</div>
 	);
@@ -84,8 +145,9 @@ PickerView.defaultProps = {
 };
 
 export interface DatePickerProps {
+	value: Date
 	visable?: boolean
-	precision?: string
+	precision: DatePrecision
 	onClose?: () => void
 	onConfirm?: () => void
 	onShow?: () => void
@@ -94,19 +156,24 @@ export interface DatePickerProps {
 
 const datePickerClassPrefix = "date-picker-component";
 
-const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, onConfirm, onShow, title }) {
+const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, onConfirm, onShow, title, value }) {
 	useLayoutEffect(() => {
 		if (!visable) {
 			disableScroll.on();
 			onShow?.();
 		}
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line
 	}, [visable]);
+	const handleClick = useCallback(() => {
+		disableScroll.off();
+		onClose?.();
+		// eslint-disable-next-line
+	}, []);
 	return (
 		<div className={datePickerClassPrefix} style={{ display: visable ? "block" : "none" }}>
-			<div className={`${datePickerClassPrefix}-mask`}></div>
+			<div className={`${datePickerClassPrefix}-mask`} onClick={handleClick}></div>
 			<div className={`${datePickerClassPrefix}-body`}>
-				<PickerView></PickerView>
+				<PickerView precision={precision} onClose={onClose} onConfirm={onConfirm}></PickerView>
 			</div>
 		</div>
 	);
