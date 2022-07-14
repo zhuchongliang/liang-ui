@@ -19,6 +19,18 @@
 		height: 50%;
 		background-color: #fff;
 	}
+	&.show {
+		animation: date-picker-fade-in 300ms both;
+		.date-picker-component-body {
+			animation: date-picker-slide-in-up 300ms both;
+		}
+	}
+	&.hide {
+		animation: date-picker-fade-out 300ms both;
+		.date-picker-component-body {
+			animation: date-picker-slide-in-down 300ms both;
+		}
+	}
 }
 .picker-view {
 	display: flex;
@@ -101,5 +113,37 @@
 				height: 34px;
 			}
 		}
+	}
+}
+@keyframes date-picker-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@keyframes date-picker-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+@keyframes date-picker-slide-in-up {
+	from {
+		transform: translate3d(0, 50px, 0);
+	}
+	to {
+		transform: translate3d(0, 0, 0);
+	}
+}
+@keyframes date-picker-slide-in-down {
+	from {
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		transform: translate3d(0, 50px, 0);
 	}
 }

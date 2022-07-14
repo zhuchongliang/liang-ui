@@ -38,8 +38,9 @@ export function defaultRenderLabel(type: DatePrecision, data: number): string {
 }
 
 export function generateDatePickerColumns(selected: number[], precision: DatePrecision): columns {
-	const year = dayjs().year() - 10;
-	const month = selected[1] ? selected[1] : 1;
+	const year = selected[0] ?? dayjs().year() - 10;
+	const currentYear = dayjs().year();
+	const month = selected[1] ?? 1;
 	const rank = precisionRankRecord[precision];
 	function generateColumns(min: number, max: number, type: DatePrecision): wheel {
 		const column: columnItem[] = [];
@@ -55,7 +56,7 @@ export function generateDatePickerColumns(selected: number[], precision: DatePre
 	}
 	const res = [];
 	const maxDay = dayjs(`${year}-${month}-1`).daysInMonth();
-	res.push(generateColumns(year - 10, year + 10, "year"));
+	res.push(generateColumns(currentYear - 10, currentYear + 10, "year"));
 	if (rank >= precisionRankRecord.month) {
 		res.push(generateColumns(1, 12, "month"));
 	}
@@ -73,4 +74,21 @@ export function generateDatePickerColumns(selected: number[], precision: DatePre
 	}
 
 	return res;
+}
+
+export function convertNumberArrayToDate(value: number[]): Date {
+	const year = value[0] ?? String(dayjs().year() - 20) ;
+	const month = value[1] ?? '1'
+	const date = value[2] ?? '1'
+	const hour = value[3] ?? '0'
+	const minute = value[4] ?? '0'
+	const second = value[5] ?? '0'
+	return new Date(
+	  year,
+	  month - 1,
+	  date,
+	  hour,
+	  minute,
+	  second
+	)
 }

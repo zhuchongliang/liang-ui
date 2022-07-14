@@ -1,10 +1,11 @@
-import React, { FC, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { FC, useCallback, useEffect, useRef, useState } from "react";
 import disableScroll from "disable-scroll";
 import { useDrag, EventTypes, FullGestureState } from "@use-gesture/react";
 import { useSpring, animated } from "@react-spring/web";
+import Classnames from "classnames";
 
 import "./index.scss";
-import { generateDatePickerColumns, columnItem, defaultRenderLabel, DatePrecision } from "../../utils/date-picker-utils";
+import { generateDatePickerColumns, columnItem, defaultRenderLabel, DatePrecision, convertNumberArrayToDate } from "../../utils/date-picker-utils";
 import { rubberbandIfOutOfBounds, bound } from "../../utils/wheel-utils";
 
 const pickerViewClassPrefix = "picker-view";
@@ -87,7 +88,7 @@ const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) =
 
 interface PickerViewProps {
 	onClose?: () => void
-	onConfirm?: () => void
+	onConfirm?: (value: Date) => void
 	title?: string
 	precision: DatePrecision
 }
@@ -109,11 +110,12 @@ const PickerView: FC<PickerViewProps> = function({ onClose, onConfirm, title, pr
 	}, []);
 	const onChange = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
 		e.preventDefault();
-		onConfirm?.();
+		const value = convertNumberArrayToDate(selected);
+		onConfirm?.(value);
 		disableScroll.off();
 		onClose?.();
 		// eslint-disable-next-line
-	}, []);
+	}, [selected]);
 	return (
 		<div className={pickerViewClassPrefix}>
 			<div className={`${pickerViewClassPrefix}-header`}>
@@ -145,20 +147,30 @@ PickerView.defaultProps = {
 };
 
 export interface DatePickerProps {
-	value: Date
 	visable?: boolean
 	precision: DatePrecision
 	onClose?: () => void
-	onConfirm?: () => void
+	onConfirm?: (value: Date) => void
 	onShow?: () => void
 	title?: string
 }
 
 const datePickerClassPrefix = "date-picker-component";
 
-const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, onConfirm, onShow, title, value }) {
-	useLayoutEffect(() => {
+const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, onConfirm, onShow, title }) {
+	const [isShow, setIsShow] = useState(visable);
+	const [active, setActive] = useState(visable);
+	const classes = Classnames(datePickerClassPrefix, { hide: !active, show: active });
+	useEffect(() => {
 		if (!visable) {
+			setActive(false);
+			const timer = setTimeout(() => {
+				setIsShow(false);
+			}, 300);
+			return () => { clearTimeout(timer); };
+		} else {
+			setActive(true);
+			setIsShow(true);
 			disableScroll.on();
 			onShow?.();
 		}
@@ -170,12 +182,17 @@ const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, 
 		// eslint-disable-next-line
 	}, []);
 	return (
-		<div className={datePickerClassPrefix} style={{ display: visable ? "block" : "none" }}>
-			<div className={`${datePickerClassPrefix}-mask`} onClick={handleClick}></div>
-			<div className={`${datePickerClassPrefix}-body`}>
-				<PickerView precision={precision} onClose={onClose} onConfirm={onConfirm}></PickerView>
-			</div>
-		</div>
+		<>
+			{
+				isShow
+					&& <div className={classes} >
+						<div className={`${datePickerClassPrefix}-mask`} onClick={handleClick}></div>
+						<div className={`${datePickerClassPrefix}-body`}>
+							<PickerView precision={precision} onClose={onClose} onConfirm={onConfirm}></PickerView>
+						</div>
+					</div>
+			}
+		</>
 	);
 };
 DatePicker.defaultProps = {

@@ -15,8 +15,8 @@ interface ActionSheetProps {
 	visable: boolean
 	actions: Action[]
 	text: string
-	onClose?: () => void
-	onConfirm?: () => void
+	onClose?: () => void | Promise<void>
+	onConfirm?: () => void | Promise<void>
 	showBtn: boolean
 	onAction: (action: Action) => void
 }
@@ -69,7 +69,7 @@ interface wrapperProps {
 function useActionSheet(): [FC<wrapperProps>, () => void, () => void, boolean] {
 	const [visable, setVisable] = useState<boolean>(false);
 	const [active, setActive] = useState<boolean>(false);
-	const onHide = async(): Promise => {
+	const onHide = async(): Promise<void> => {
 		setActive(false);
 		await new Promise((resolve) => {
 			setTimeout(resolve, 300);
@@ -84,8 +84,8 @@ function useActionSheet(): [FC<wrapperProps>, () => void, () => void, boolean] {
 	};
 	const wrapper: FC<wrapperProps> = ({ actions, showBtn, text, onConfirm, onAction, className }) => {
 		const classes = ClassNames({ hide: !active, show: active }, className);
-		const onYes = (): void => {
-			onHide();
+		const onYes = async(): Promise<void> => {
+			await onHide();
 			onConfirm?.();
 		};
 		return <ActionSheet
