@@ -15,8 +15,8 @@ interface ActionSheetProps {
 	visable: boolean
 	actions: Action[]
 	text: string
-	onClose?: () => void | Promise<void>
-	onConfirm?: () => void | Promise<void>
+	onClose?: () => Promise<void>
+	onConfirm?: () => Promise<void>
 	showBtn: boolean
 	onAction: (action: Action) => void
 }
