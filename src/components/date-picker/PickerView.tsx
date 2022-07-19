@@ -8,7 +8,7 @@ import {
 	convertWeekToNumberArray,
 	Precision
 } from "../../utils/date-picker-utils";
-import Wheel from "./wheel";
+import Wheel from "./Wheel";
 
 const pickerViewClassPrefix = "picker-view";
 

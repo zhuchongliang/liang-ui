@@ -11,7 +11,7 @@ interface DatePickerProps {
 	visable: boolean
 	precision: Precision
 	onConfirm?: (value: Date) => Promise<void>
-	onClose?: () => Promise<void>
+	onClose: () => Promise<void>
 	className: string
 }
 
@@ -24,7 +24,7 @@ const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, 
 			{
 				visable
 					&& <div className={classes} >
-						<div className={`${datePickerClassPrefix}-mask`} onClick={onClose}></div>
+						<div className={`${datePickerClassPrefix}-mask`} ></div>
 						<div className={`${datePickerClassPrefix}-body`}>
 							<PickerView
 								precision={precision}
@@ -53,13 +53,11 @@ function useDatePicker(): [FC<WrapperProps>, () => void, () => Promise<void>, bo
 	const [visable, setVisable] = useState(false);
 	const [active, setActive] = useState(false);
 	const onShow = useCallback(() => {
-		console.log(2);
 		setActive(true);
 		disableScroll.on();
 		setVisable(true);
 	}, []);
 	const onHide = useCallback(async() => {
-		console.log(1);
 		setActive(false);
 		await new Promise((resolve) => {
 			setTimeout(resolve, 300);
@@ -68,6 +66,7 @@ function useDatePicker(): [FC<WrapperProps>, () => void, () => Promise<void>, bo
 	}, []);
 	const wrapper: FC<WrapperProps> = useCallback(({ precision, onConfirm, value }) => {
 		const classes = Classnames({ hide: !active, show: active });
+		console.log(1);
 		const onYes = async(value: Date): Promise<void> => {
 			await onHide();
 			onConfirm?.(value);

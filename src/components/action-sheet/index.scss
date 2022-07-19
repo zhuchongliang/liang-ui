@@ -24,38 +24,41 @@
 	&-body {
 		position: fixed;
 		left: 0;
+		right: 0;
 		bottom: 0;
 		z-index: 11;
-		border-radius: 10px 10px 0 0;
+		margin: 0 auto;
+		border-radius: .2rem .2rem 0 0;
 		width: 100%;
+		max-width: 600px;
 		background-color: #fff;
 	}
 	&-button-list {
 		&-item {
 			display: block;
 			box-sizing: border-box;
-			border-bottom: 1px solid #eee;
-			height: 57px;
+			border-bottom: .02rem solid #eee;
+			height: 1.14rem;
 			&-name {
-				height: 56px;
-				line-height: 56px;
+				height: 1.12rem;
+				line-height: 1.12rem;
 				text-align: center;
-				font-size: 18px;
+				font-size: .36rem;
 				color: #333;
 			}
 		}
 	}
 	&-confirm-button {
-		padding-top: 8px;
+		padding-top: .16rem;
 		background-color: #f5f5f5;
 		&-item {
 			display: block;
 			&-name {
-				height: 56px;
+				height: 1.12rem;
 				background-color: #fff;
-				line-height: 56px;
+				line-height: 1.12rem;
 				text-align: center;
-				font-size: 18px;
+				font-size: .36rem;
 				color: #333;
 			}
 		}

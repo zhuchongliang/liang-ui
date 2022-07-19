@@ -15,7 +15,14 @@ interface WheelProps {
 	onSelect: (selected: number, colunmIndex: number) => void
 }
 const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) => {
+	// const itemHeight = useRef<number>(itemHeight.current);
+	const rootRef = useRef<HTMLDivElement>(null);
+	const itemHeight = useRef<number>(34);
 	const draggingRef = useRef(false);
+	useEffect(() => {
+		const fontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize);
+		itemHeight.current = 0.68 * fontSize;
+	}, []);
 	useEffect(() => {
 		if (!colunm.some(item => item.value === value)) {
 			onSelect(colunm[0].value, colunmIndex);
@@ -26,13 +33,12 @@ const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) =
 		if (draggingRef.current) return;
 		const targetIndex = colunm.findIndex(item => item.value === value);
 		if (targetIndex < 0) return;
-		const finalPosition = -targetIndex * 34;
+		const finalPosition = -targetIndex * itemHeight.current;
 		api.start({
 			immediate: y.goal !== finalPosition, y: finalPosition
 		});
 		// eslint-disable-next-line
 	}, [value, colunm]);
-	const rootRef = useRef<HTMLDivElement>(null);
 	const [{ y }, api] = useSpring(() => ({
 		config: {
 			mass: 0.8,
@@ -41,7 +47,7 @@ const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) =
 		from: { y: 0 }
 	}));
 	const scrollSelect = (index: number): void => {
-		const finalPosition = -index * 34;
+		const finalPosition = -index * itemHeight.current;
 		api.start({
 			y: finalPosition
 		});
@@ -54,18 +60,18 @@ const Wheel: FC<WheelProps> = ({ colunm, colunmIndex, onSelect, value, type }) =
 			event: EventTypes["drag"]
 		})
 	): void => {
-		const min = -((colunm.length - 1) * 34);
+		const min = -((colunm.length - 1) * itemHeight.current);
 		const max = 0;
 		draggingRef.current = true;
 		if (state.last) {
 			draggingRef.current = false;
 			const position = state.offset[1] + state.velocity[1] * 50 * state.direction[1];
-			const targetIndex = -Math.round(bound(min, max, position) / 34);
+			const targetIndex = -Math.round(bound(min, max, position) / itemHeight.current);
 			scrollSelect(targetIndex);
 		} else {
 			const position = state.offset[1];
 			api.start({
-				y: rubberbandIfOutOfBounds(0.2, 34 * 50, max, min, position)
+				y: rubberbandIfOutOfBounds(0.2, itemHeight.current * 50, max, min, position)
 			});
 		}
 	};
