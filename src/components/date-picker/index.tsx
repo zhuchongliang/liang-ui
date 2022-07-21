@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useState } from "react";
+import React, { FC, useCallback, useState, useRef, forwardRef } from "react";
 import disableScroll from "disable-scroll";
 import Classnames from "classnames";
 
@@ -11,20 +11,20 @@ interface DatePickerProps {
 	visable: boolean
 	precision: Precision
 	onConfirm?: (value: Date) => Promise<void>
-	onClose: () => Promise<void>
-	className: string
+	onClose?: () => Promise<void>
+	ref: React.ForwardedRef<HTMLDivElement>
 }
 
 const datePickerClassPrefix = "date-picker-component";
 
-const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, onConfirm, className, value }) {
-	const classes = Classnames(datePickerClassPrefix, className);
+const DatePicker: FC<DatePickerProps> = forwardRef(function({ visable, precision, onClose, onConfirm, value }: DatePickerProps, ref) {
+	const classes = Classnames(datePickerClassPrefix, "show");
 	return (
 		<>
 			{
 				visable
-					&& <div className={classes} >
-						<div className={`${datePickerClassPrefix}-mask`} ></div>
+					&& <div className={classes} ref={ref}>
+						<div className={`${datePickerClassPrefix}-mask`} onClick={onClose}></div>
 						<div className={`${datePickerClassPrefix}-body`}>
 							<PickerView
 								precision={precision}
@@ -37,7 +37,8 @@ const DatePicker: FC<DatePickerProps> = function({ visable, precision, onClose, 
 			}
 		</>
 	);
-};
+});
+DatePicker.displayName = "DatePicker";
 DatePicker.defaultProps = {
 	precision: "day",
 	visable: false
@@ -51,22 +52,21 @@ interface WrapperProps {
 
 function useDatePicker(): [FC<WrapperProps>, () => void, () => Promise<void>, boolean] {
 	const [visable, setVisable] = useState(false);
-	const [active, setActive] = useState(false);
+	const divEle = useRef<HTMLDivElement>(null);
 	const onShow = useCallback(() => {
-		setActive(true);
 		disableScroll.on();
 		setVisable(true);
-	}, []);
+		// eslint-disable-next-line
+	}, [visable]);
 	const onHide = useCallback(async() => {
-		setActive(false);
+		divEle.current?.classList.replace("show", "hide");
 		await new Promise((resolve) => {
 			setTimeout(resolve, 300);
 		});
 		setVisable(false);
-	}, []);
+		// eslint-disable-next-line
+	}, [visable]);
 	const wrapper: FC<WrapperProps> = useCallback(({ precision, onConfirm, value }) => {
-		const classes = Classnames({ hide: !active, show: active });
-		console.log(1);
 		const onYes = async(value: Date): Promise<void> => {
 			await onHide();
 			onConfirm?.(value);
@@ -77,10 +77,10 @@ function useDatePicker(): [FC<WrapperProps>, () => void, () => Promise<void>, bo
 			precision={precision}
 			onClose={onHide}
 			onConfirm={onYes}
-			className={classes}
+			ref={divEle}
 		/>;
 		// eslint-disable-next-line
-	}, [active, visable]);
+	}, [onHide, visable]);
 	return [wrapper, onShow, onHide, visable];
 }
 
