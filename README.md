@@ -1,4 +1,4 @@
-# Battle UI
+# liang UI
 
 - 项目：liang-ui
 - 环境：`Node v16+`
