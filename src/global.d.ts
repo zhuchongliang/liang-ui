@@ -36,4 +36,6 @@ declare module "*.vob";
 declare module "*.wmv";
 declare module "*.rmvb";
 
+declare module "classnames";
+
 declare const RUN_ENV: string;

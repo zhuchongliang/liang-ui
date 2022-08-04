@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 
 import "./index.scss";
@@ -69,20 +69,22 @@ interface wrapperProps {
 function useActionSheet(): [FC<wrapperProps>, () => void, () => void, boolean] {
 	const [visable, setVisable] = useState<boolean>(false);
 	const [active, setActive] = useState<boolean>(false);
-	const onHide = async(): Promise<void> => {
+	const onHide = useCallback(async() => {
 		setActive(false);
 		await new Promise((resolve) => {
 			setTimeout(resolve, 300);
 		});
 		setVisable(false);
 		disableScroll.off();
-	};
-	const onShow = (): void => {
+		// eslint-disable-next-line
+	}, [visable, active]);
+	const onShow = useCallback(() => {
 		setActive(true);
 		setVisable(true);
 		disableScroll.on();
-	};
-	const wrapper: FC<wrapperProps> = ({ actions, showBtn, text, onConfirm, onAction, className }) => {
+		// eslint-disable-next-line
+	}, [visable]);
+	const wrapper: FC<wrapperProps> = useCallback(({ actions, showBtn, text, onConfirm, onAction, className }) => {
 		const classes = ClassNames({ hide: !active, show: active }, className);
 		const onYes = async(): Promise<void> => {
 			await onHide();
@@ -98,7 +100,8 @@ function useActionSheet(): [FC<wrapperProps>, () => void, () => void, boolean] {
 			actions={actions}
 			onAction={onAction}
 		/>;
-	};
+		// eslint-disable-next-line
+	}, [visable, onHide]);
 	return [wrapper, onShow, onHide, visable];
 }
 
