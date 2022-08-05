@@ -1,35 +1,110 @@
-import useDatePicker from "..";
-import React, { useState, FC, useEffect } from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import React, { FC, useEffect } from "react";
+import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
 import "@testing-library/jest-dom";
+import dayjs from "dayjs";
 
-afterEach(cleanup);
+import useDatePicker from "..";
+import { Precision } from "../../../utils/date-picker-utils";
+
+interface AppProps {
+	onConfirm?: (val: Date) => void
+	value?: Date
+	precision?: Precision
+}
+const App: FC<AppProps> = function({ onConfirm, value, precision }) {
+	const [DatePicker, onShow] = useDatePicker();
+	useEffect(() => {
+		onShow();
+		// eslint-disable-next-line
+	}, []);
+	return <DatePicker
+		precision={precision}
+		onConfirm={onConfirm}
+		value={value}
+	/>;
+};
+const now = new Date();
 
 describe("DatePicker", () => {
-	const App: FC = function() {
-		const [DatePicker, onShow] = useDatePicker();
-		const [precision] = useState<"day">("day");
-		const [value] = useState<Date>(new Date());
-		useEffect(() => {
-			onShow();
-			// eslint-disable-next-line
-		}, []);
-		return <DatePicker value={value} precision={precision}/>;
-	};
-	// test("render DatePicker component", () => {
-	// 	const { asFragment } = render(<App />);
-	// 	expect(asFragment()).toMatchSnapshot();
-	// });
-	test("cancel button click", async() => {
-		const user = userEvent.setup();
-		render(<App />);
+	test("renders basic", async() => {
+		const fn = jest.fn();
 
-		expect(screen.getByText("取消")).toBeInTheDocument();
+		const { getByText } = render(
+			<App
+				value={new Date(1659683582503)}
+				onConfirm={ val => {
+					fn(val.toDateString());
+				}}
+			/>
+		);
+		await userEvent.click(getByText("确定"));
+		await waitForElementToBeRemoved(document.querySelector(".date-picker-component"));
 
-		await user.click(screen.getByText("取消"));
+		expect(fn).toBeCalled();
 
-		expect(screen.getByText("取消")).not.toBeInTheDocument();
+		expect(fn.mock.calls[0][0]).toContain("Fri Aug 05 2022");
+	});
+
+	test("shoudle pick now without value", async() => {
+		const fn = jest.fn();
+
+		const dateString = now.toDateString();
+		const { getByText } = render(
+			<App
+				onConfirm={ val => {
+					fn(val.toDateString());
+				}}
+			/>
+		);
+		await userEvent.click(getByText("确定"));
+		await waitForElementToBeRemoved(document.querySelector(".date-picker-component"));
+
+		expect(fn.mock.calls[0][0]).toBe(dateString);
+	});
+
+	test("precision minute", async() => {
+		const fn = jest.fn();
+
+		const { getByText } = render(
+			<App
+				value={now}
+				precision="minute"
+				onConfirm={ val => {
+					fn(val);
+				}}
+			/>
+		);
+
+		expect(document.querySelectorAll(".picker-view-body-column").length).toBe(5);
+
+		await userEvent.click(getByText("确定"));
+		await waitForElementToBeRemoved(document.querySelector(".date-picker-component"));
+
+		const confirmedDay = dayjs(fn.mock.calls[0][0]);
+		const formatTemplate = "YYYY-MM-DD HH:mm";
+		expect(confirmedDay.format(formatTemplate)).toBe(
+			dayjs(now).format(formatTemplate)
+		);
+	});
+
+	test("precision week", async() => {
+		const fn = jest.fn();
+
+		const { getByText } = render(
+			<App
+				precision="week-day"
+				onConfirm={ val => {
+					fn(val.toDateString());
+				}}
+			/>
+		);
+
+		expect(document.querySelectorAll(".picker-view-body-column").length).toBe(3);
+
+		await userEvent.click(getByText("确定"));
+		await waitForElementToBeRemoved(document.querySelector(".date-picker-component"));
+
+		expect(fn.mock.calls[0][0]).toBe(now.toDateString());
 	});
 });
