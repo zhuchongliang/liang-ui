@@ -1,16 +1,16 @@
-import { cleandir } from "rollup-plugin-cleandir";
-import commonjs from "@rollup/plugin-commonjs";
-import nodeResolve from "@rollup/plugin-node-resolve";
-import postcss from "rollup-plugin-postcss";
-import typescript from "rollup-plugin-typescript2";
-import dts from "rollup-plugin-dts";
-import postcssBase64 from "postcss-base64";
-import postcssImport from "postcss-import";
-import postcssPresetEnv from "postcss-preset-env";
-import replace from "@rollup/plugin-replace";
-import img from "@rollup/plugin-image";
-import { terser } from "rollup-plugin-terser";
-import analyze from "rollup-plugin-analyzer";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const { cleandir } = require("rollup-plugin-cleandir");
+const commonjs = require("@rollup/plugin-commonjs");
+const nodeResolve = require("@rollup/plugin-node-resolve");
+const postcss = require("rollup-plugin-postcss");
+const typescript = require("rollup-plugin-typescript2");
+const dts = require("rollup-plugin-dts");
+const postcssBase64 = require("postcss-base64");
+const postcssImport = require("postcss-import");
+const postcssPresetEnv = require("postcss-preset-env");
+const replace = require("@rollup/plugin-replace");
+const img = require("@rollup/plugin-image");
+const { terser } = require("rollup-plugin-terser");
 
 const external = ["react", "react-dom"];
 
@@ -53,16 +53,14 @@ const plugins = [
 		compress: { drop_console: false },
 		format: { comments: false }
 	}),
-	nodeResolve(),
-	typescript(),
-	analyze()
+	nodeResolve.default(),
+	typescript()
 ];
-
-export default [{
+module.exports = [{
 	external,
 	input: "src/index.ts",
 	output: {
-		file: "dist/index.esm.js",
+		file: "lib/bundle/index.es.js",
 		format: "es",
 		globals
 	},
@@ -71,7 +69,7 @@ export default [{
 	external,
 	input: "src/index.ts",
 	output: {
-		file: "dist/index.cjs.js",
+		file: "lib/bundle/index.cjs.js",
 		format: "cjs",
 		globals
 	},
@@ -79,7 +77,7 @@ export default [{
 }, {
 	input: "src/index.umd.ts",
 	output: {
-		file: "dist/index.umd.js",
+		file: "lib/umd/index.umd.js",
 		format: "umd",
 		name: "liangUI"
 	},
@@ -87,8 +85,8 @@ export default [{
 }, {
 	input: "src/index.ts",
 	output: {
-		file: "dist/index.d.ts",
+		file: "lib/bundle/index.d.ts",
 		format: "esm"
 	},
-	plugins: [plugins[0], dts()]
+	plugins: [plugins[0], dts.default()]
 }];
