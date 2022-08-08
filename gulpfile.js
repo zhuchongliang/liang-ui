@@ -14,7 +14,6 @@ const rollup = require("rollup");
 const rollupConfig = require("./rollup.config.js");
 const through = require("through2");
 
-console.log(rollupConfig);
 function clean() {
 	return del("./lib/**");
 }
@@ -51,6 +50,14 @@ function buildStyle() {
 		]))
 		.pipe(gulp.dest("lib/es"))
 		.pipe(gulp.dest("lib/cjs"));
+}
+
+function copyAsserts() {
+	return gulp
+		.src("./src/assets/**/*")
+		.pipe(gulp.dest("./lib/cjs/assets"))
+		.pipe(gulp.dest("./lib/es/assest"))
+		.pipe(gulp.dest("./lib/assets"));
 }
 
 function buildEs() {
@@ -94,20 +101,21 @@ function buildDeclaration() {
 }
 
 async function umdRollup() {
-	const umdConfig = rollupConfig[1];
+	const umdConfig = rollupConfig[2];
 	const umd = await rollup.rollup(umdConfig);
 	await umd.write(umdConfig.output);
 }
 async function buildCjsBundles() {
-	const bundleConfig = rollupConfig[0];
+	const bundleConfig = rollupConfig[1];
 	const bundle = await rollup.rollup(bundleConfig);
 	await bundle.write(bundleConfig.output);
 }
 async function buildEsmBundles() {
-	const bundleConfig = rollupConfig[2];
+	const bundleConfig = rollupConfig[0];
 	const bundle = await rollup.rollup(bundleConfig);
 	await bundle.write(bundleConfig.output);
 }
+
 function copyMetaFiles() {
 	return gulp.src(["./README.md"]).pipe(gulp.dest("./lib/"));
 }
@@ -134,6 +142,7 @@ exports.default = gulp.series(
 	buildEs,
 	buildCjs,
 	gulp.parallel(buildDeclaration, buildStyle),
+	copyAsserts,
 	copyMetaFiles,
 	generatePackageJSON,
 	gulp.parallel(umdRollup, buildCjsBundles, buildEsmBundles)

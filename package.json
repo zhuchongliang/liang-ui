@@ -11,10 +11,12 @@
   },
   "name": "liang-ui",
   "version": "1.0.0",
-  "main": "dist/index.js",
-  "jsnext:main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "browser": "dist/index.umd.js",
+  "main": "cjs/index.js",
+  "jsnext:main": "es/index.js",
+  "module": "es/index.js",
+  "browser": "umd/index.umd.js",
+  "types": "./es/index.d.ts",
+  "typings": "./es/index.d.ts",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.18.10",
@@ -60,6 +62,7 @@
   },
   "scripts": {
     "build": "gulp",
-    "jest": "jest"
+    "test": "jest",
+    "test-with-coverage": "jest --coverage"
   }
 }

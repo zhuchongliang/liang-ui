@@ -1,5 +1,5 @@
 import React, { FC, useEffect } from "react";
-import { render, screen, waitForElementToBeRemoved } from "@testing-library/react";
+import { render, waitForElementToBeRemoved } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import dayjs from "dayjs";

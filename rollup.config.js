@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const { cleandir } = require("rollup-plugin-cleandir");
 const commonjs = require("@rollup/plugin-commonjs");
-const nodeResolve = require("@rollup/plugin-node-resolve");
+const nodeResolve = require("@rollup/plugin-node-resolve").default;
 const postcss = require("rollup-plugin-postcss");
 const typescript = require("rollup-plugin-typescript2");
-const dts = require("rollup-plugin-dts");
+const dts = require("rollup-plugin-dts").default;
 const postcssBase64 = require("postcss-base64");
 const postcssImport = require("postcss-import");
 const postcssPresetEnv = require("postcss-preset-env");
@@ -53,14 +53,23 @@ const plugins = [
 		compress: { drop_console: false },
 		format: { comments: false }
 	}),
-	nodeResolve.default(),
+	nodeResolve(),
 	typescript()
 ];
+
+const onwarn = function(warning) {
+	if (warning.code === "THIS_IS_UNDEFINED") {
+		return;
+	}
+	console.warn(warning.message);
+};
+
 module.exports = [{
 	external,
 	input: "src/index.ts",
+	onwarn,
 	output: {
-		file: "lib/bundle/index.es.js",
+		file: "lib/bundle/index.esm.js",
 		format: "es",
 		globals
 	},
@@ -68,6 +77,7 @@ module.exports = [{
 }, {
 	external,
 	input: "src/index.ts",
+	onwarn,
 	output: {
 		file: "lib/bundle/index.cjs.js",
 		format: "cjs",
@@ -75,7 +85,8 @@ module.exports = [{
 	},
 	plugins
 }, {
-	input: "src/index.umd.ts",
+	input: "src/index.ts",
+	onwarn,
 	output: {
 		file: "lib/umd/index.umd.js",
 		format: "umd",
@@ -85,8 +96,8 @@ module.exports = [{
 }, {
 	input: "src/index.ts",
 	output: {
-		file: "lib/bundle/index.d.ts",
+		file: "dist/index.d.ts",
 		format: "esm"
 	},
-	plugins: [plugins[0], dts.default()]
+	plugins: [plugins[0], dts()]
 }];
