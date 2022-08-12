@@ -1,0 +1,71 @@
+.select {
+	&-component {
+		position: relative;
+		border-radius: .1rem;
+		width: 100%;
+		height: .75rem;
+		background-color: #212737;
+		transition: all 300ms;
+		&.disabled {
+			background-color: transparent;
+			pointer-events: none;
+			.select-icon {
+				opacity: 0;
+			}
+		}
+		&.active {
+			.select-list {
+				overflow: auto;
+				max-height: 4rem;
+			}
+			.select-icon {
+				transform: rotate(180deg);
+			}
+		}
+	}
+	&-target {
+		padding: 0 .5rem 0 .25rem;
+		line-height: .75rem;
+		font-size: .28rem;
+		color: #525b74;
+		transition: all 300ms;
+		&.active {
+			color: #fff;
+		}
+	}
+	&-icon {
+		position: absolute;
+		right: .25rem;
+		top: .25rem;
+		width: .25rem;
+		height: .25rem;
+		background: url("../../assets/img/icon/select.svg") no-repeat center/cover;
+		transition: all 300ms;
+	}
+	&-list {
+		overflow: hidden;
+		position: absolute;
+		left: 0;
+		top: 100%;
+		z-index: 9;
+		border-radius: 0 0 .1rem .1rem;
+		width: 100%;
+		max-height: 0;
+		background-color: #212737;
+		transition: all 300ms;
+	}
+	&-item {
+		overflow: hidden;
+		padding: 0 .25rem;
+		height: .75rem;
+		line-height: .75rem;
+		text-overflow: ellipsis;
+		font-size: .28rem;
+		color: #fff;
+		white-space: nowrap;
+		transition: all 300ms;
+		&.active {
+			background-color: #232a3d;
+		}
+	}
+}

@@ -1,0 +1,13 @@
+.area {
+	&-pc {
+		display: flex;
+		justify-content: space-between;
+	}
+	&-prov,
+	&-city {
+		width: 3.1rem !important;
+	}
+	&-address {
+		margin-top: .15rem;
+	}
+}

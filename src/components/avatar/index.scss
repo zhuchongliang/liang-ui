@@ -1,0 +1,27 @@
+.avatar {
+	&-component {
+		display: flex;
+		justify-content: center;
+		transition: all 300ms;
+		&.disabled {
+			opacity: .8;
+			pointer-events: none;
+		}
+	}
+	&-cover {
+		border-radius: 100%;
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+	&-cropper {
+		display: flex;
+	}
+	&-filebtn {
+		position: absolute;
+		left: 0;
+		bottom: 0;
+		width: 50%;
+		height: 100%;
+		opacity: 0;
+	}
+}

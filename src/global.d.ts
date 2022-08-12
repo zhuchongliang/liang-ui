@@ -37,5 +37,6 @@ declare module "*.wmv";
 declare module "*.rmvb";
 
 declare module "classnames";
+declare module "*.scss";
 
 declare const RUN_ENV: string;

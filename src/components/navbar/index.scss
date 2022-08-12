@@ -1,0 +1,25 @@
+.navbar {
+	&-component {
+		position: relative;
+		padding: 0 1rem;
+		height: .9rem;
+		background-color: #1c2230;
+		line-height: .9rem;
+		text-align: center;
+		font-size: .32rem;
+		color: #fff;
+	}
+	&-btn {
+		position: absolute;
+		top: .2rem;
+		width: .5rem;
+		height: .5rem;
+		&.left {
+			left: .25rem;
+			background: url("../../assets/img/icon/goback.svg") no-repeat center/cover;
+		}
+		&.right {
+			right: .25rem;
+		}
+	}
+}

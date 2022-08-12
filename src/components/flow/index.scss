@@ -1,0 +1,48 @@
+.flow {
+	&-component {
+		display: flex;
+		position: fixed;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		z-index: 999999;
+		flex-direction: column;
+		background-color: #1a1f2b;
+		&.show {
+			animation: flow-fade-in 300ms both;
+		}
+		&.hide {
+			animation: flow-fade-out 300ms both;
+		}
+	}
+	&-body {
+		overflow: hidden;
+		flex: 1;
+		&-wrapper {
+			overflow: auto;
+			padding: .25rem;
+			height: 100%;
+		}
+	}
+}
+@keyframes flow-fade-in {
+	from {
+		opacity: 0;
+		transform: translate3d(100%, 0, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+@keyframes flow-fade-out {
+	from {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+	to {
+		opacity: 0;
+		transform: translate3d(100%, 0, 0);
+	}
+}
